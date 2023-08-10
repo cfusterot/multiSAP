@@ -1,0 +1,6 @@
+name: scrublet
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - scrublet
