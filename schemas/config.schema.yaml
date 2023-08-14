@@ -1,0 +1,62 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+# possible entries of the config file and which type they should be
+properties:
+  samples:
+    type: string
+  units:
+    type: string
+  out:
+    type: string
+  log:
+    type: string
+
+  envmodules:
+    type: object
+    properties:
+      cellranger:
+        type: string
+    required:
+      - cellranger
+
+  amulet:
+    type: object
+    properties:
+      autosomes: 
+        type: string
+      blacklist: 
+        type: string
+    required:
+      - autosomes
+      - blacklist
+  
+  cellranger:
+    type: object
+    properties:
+      reference:
+        type: string
+    required:
+      - reference
+    
+  mgatk:
+    type: object
+    properties:
+      enable:
+        type: boolean
+    required:
+      - enable
+
+# entries that have to be in the config file for successful validation
+required:
+  - envmodules
+  - samples
+  - units
+  - out
+  - log
+  - cellranger
+  - amulet
+  - mgatk

@@ -47,16 +47,6 @@ def get_integration_amulet(wc):
     file = list(set(file))
     return file
 
-def step2_signac_input(wc):
-    file = expand("{OUTDIR}/signac/SeuratObject_{alias}.rds", OUTDIR=OUTDIR, alias=samples.loc[wc.sample]['alias'])
-    file = list(set(file))
-    return file
-
-def step2_signac_output(wc):
-    file = expand("{OUTDIR}/signac/SeuratObject_{alias}.rds", OUTDIR=OUTDIR, alias=samples.loc[wc.sample]['alias'])
-    file = list(set(file))
-    return file
-
 # Create a rule that decides whether an integrated or merged object could be
 # the output. For instance: if harmony = TRUE and exists a merged.rds file;
 # then the output is mergedintegration.rds
@@ -67,8 +57,7 @@ rule all:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
-                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                "{OUTDIR}/signac/SeuratObject_Merge.rds"
+                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
 # -- Rule files -- #
@@ -76,5 +65,5 @@ include: "rules/cellranger.smk"
 include: "rules/qc.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"
-include: "rules/signac.smk"
+#include: "rules/signac.smk"
 include: "rules/other.smk"
