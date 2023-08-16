@@ -13,9 +13,28 @@ def get_fq_path(wc):
     dirname, basename = os.path.split(filepath)
     return dirname
 
+rule samples_csv:
+    output:
+        csv = "{}/{{sample}}/cellranger_count/samples.csv".format(OUTDIR)
+    params:
+        outdir = OUTDIR,
+        sample = lambda wc: units["fqs"][wc.sample]
+    threads:
+        get_resource("default", "threads")
+    resources:
+        mem_mb=get_resource("default", "mem_mb"),
+        walltime=get_resource("default", "walltime")
+    log:
+        err="{}/{{sample}}/samples_csv.err".format(LOGDIR),
+        out="{}/{{sample}}/samples_csv.out".format(LOGDIR),
+        time="{}/{{sample}}/samples_csv.time".format(LOGDIR)
+    shell:
+        "../scripts/create_samples_csv.R"
+
 rule cellranger_count:
     input:
-        fq=lambda wc: units["fqs"][wc.sample]
+        fq=lambda wc: units["fqs"][wc.sample],
+        csv = "{}/{{sample}}/cellranger_count/samples.csv".format(OUTDIR)
     output:
         finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
     params:    
