@@ -6,7 +6,7 @@ dependencies:
   - r-base
   - r-matrix
   - r-data.table
-  - bioconductor-genomeinfodbdata=1.2.10
+    #- bioconductor-genomeinfodbdata=1.2.10
   - bioconductor-genomicranges
   - bioconductor-summarizedexperiment
   - python=3.6   # or 2.7
