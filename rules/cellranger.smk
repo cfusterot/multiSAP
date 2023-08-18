@@ -8,17 +8,12 @@ def get_sample_option(wc):
     option_str += f"--sample={prefix}"
     return option_str
 
-def get_fq_path(wc):
-    filepath = units["fq1"][wc.sample][0]
-    dirname, basename = os.path.split(filepath)
-    return dirname
-
 rule samples_csv:
     output:
         csv = "{}/{{sample}}/cellranger_count/samples.csv".format(OUTDIR)
     params:
         outdir = OUTDIR,
-        sample = lambda wc: units["fqs"][wc.sample]
+        sample = lambda wc: units["sample"][wc.sample]
     threads:
         get_resource("default", "threads")
     resources:
@@ -28,7 +23,7 @@ rule samples_csv:
         err="{}/{{sample}}/samples_csv.err".format(LOGDIR),
         out="{}/{{sample}}/samples_csv.out".format(LOGDIR),
         time="{}/{{sample}}/samples_csv.time".format(LOGDIR)
-    shell:
+    script:
         "../scripts/create_samples_csv.R"
 
 rule cellranger_count:
@@ -54,7 +49,7 @@ rule cellranger_count:
         {DATETIME} > {log.time} &&
         cellranger-arc count --id={wildcards.sample} \
         --reference={params.reference} \
-        --libraries={samples.csv} 2> {log.err} > {log.out}
+        --libraries={input.csv} 2> {log.err} > {log.out}
         mv {wildcards.sample}/* {OUTDIR}/{wildcards.sample}/cellranger_count
         touch {OUTDIR}/{wildcards.sample}/cellranger_count/cellranger.finish
         rm -r {wildcards.sample}
