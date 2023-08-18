@@ -17,7 +17,7 @@ per_sample<- function(x, outdir, sample_ID){
                 library_type = "Chromatine Accesibility") 
   out <- rbind(GEX, ATAC)
   message(paste0("Saving individual sample.csv file for sample:", sample_ID))
-  write.csv(out, file.path(outdir, sample_ID, "cellranger_count", "samples.csv"))
+  write.csv(out, file.path(outdir, sample_ID, "cellranger_count", "samples.csv"), row.names=FALSE)
 }
 
 # -- Read samples file -- #
