@@ -4,7 +4,7 @@ rule mgatk:
     input:
         finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
     params:
-        bam="{}/{{sample}}/cellranger_count/outs/possorted_bam.bam".format(OUTDIR)
+        bam="{}/{{sample}}/cellranger_count/outs/atac_possorted_bam.bam".format(OUTDIR)
     output:
         ref="{}/{{sample}}/mgatk/final/{{sample}}.variant_stats.tsv.gz".format(OUTDIR)
     conda:

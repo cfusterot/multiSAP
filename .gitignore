@@ -1,2 +1,3 @@
 .snakemake/
 slurm-*.out
+resources/AMULET/__pycache__/peakoverlap.cpython-36.pyc
