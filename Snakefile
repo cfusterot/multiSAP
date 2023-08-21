@@ -56,7 +56,7 @@ rule all:
     input:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
-#                "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
+                "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 

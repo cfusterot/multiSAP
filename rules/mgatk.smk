@@ -1,8 +1,25 @@
 import glob
 
+rule zcat:
+    input:
+        gz="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix/barcodes.tsv.gz".format(OUTDIR)
+    output:
+        tsv="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix/barcodes.tsv".format(OUTDIR)
+    threads: get_resource("default", "threads")
+    resources:
+        mem_mb=get_resource("default", "mem_mb"),
+        walltime=get_resource("default","walltime")
+    log:
+        err="{}/{{sample}}/zcat.err".format(LOGDIR),
+        out="{}/{{sample}}/zcat.out".format(LOGDIR)
+    shell: 
+        """
+        zcat -k {input.gz} > {output.tsv}
+        """
+
 rule mgatk:
     input:
-        finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
+        tsv="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix/barcodes.tsv".format(OUTDIR)
     params:
         bam="{}/{{sample}}/cellranger_count/outs/atac_possorted_bam.bam".format(OUTDIR)
     output:
@@ -23,5 +40,5 @@ rule mgatk:
         export LANG=C.UTF-8
         # run mgatk command
         mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ \
-        -bt CB -b {OUTDIR}/{wildcards.sample}/cellranger_count/outs/filtered_peak_bc_matrix/barcodes.tsv 
+        -bt CB -b {input.tsv} 
         """
