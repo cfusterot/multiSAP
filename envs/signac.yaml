@@ -16,3 +16,9 @@ dependencies:
   - r-signac
   - r-seurat
   - r-data.table
+  - bioconductor-summarizedexperiment
+  - r-matrix
+  - r-cowplot
+  - r-dt
+  - r-details
+  - r-seuratdisk

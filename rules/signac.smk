@@ -1,11 +1,11 @@
 import glob
 
 if config["signac"]["enable"]:
-    rule step1_signac:
+    rule step1_preprocess:
         input:
-            outs=get_integration_outs, 
-            mgatk=get_integration_mgatk, 
-            amulet=get_integration_amulet
+            outs="{}/{{sample}}/cellranger_count/outs/".format(OUTDIR), 
+            mgatk="{}/{{sample}}/mgatk/final".format(OUTDIR), 
+            amulet="{}/{{sample}}/amulet/MultipletBarcodes_01.txt".format(OUTDIR)
         output:
             directory=expand("{OUTDIR}/signac", OUTDIR = OUTDIR),
             qc_plots=expand("{OUTDIR}/signac/plots/vlnplot_qc_beforefiltering_ATAC.pdf", OUTDIR = OUTDIR)
