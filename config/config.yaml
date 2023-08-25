@@ -37,42 +37,20 @@ mgatk:
 signac:
   enable: TRUE
   qc:
-    min_peak_width: 20
-    max_peak_width: 10000
-    min_counts: 500
-    max_nucleosome_signal: 2
-    min_TSS: 2
-    min_peak_fragment: 1000
-    max_peak_fragment: 25000
-    min_percentage_peaks: 30
+    ncount_atac_min: 1000
+    ncount_rna_min: 1000
+    ncount_atac_max: 25000 
+    ncount_rna_max: 20000
+    nuclesome_signal: 2
+    tss_enrichment: 3
+    percent_mt: 10
   mito:
-    enable: TRUE
     min_depth: 10
-    min_strand_cor: 0.65
+    n_cells_conf_detected: 1
+    strand_correlation: 0.65
     min_cell_var: 5
-    min_VMR: 0.01
-    clonotype_finding:
-      fc_resolution: 1
-      fc_k: 10
   annotation:
-    granges_ens: "EnsDb.Hsapiens.v86" 
-    genome: "hg38"
-  integrate_samples: TRUE
-  GEX: TRUE
-  harmony: 
-    enable: TRUE
-    lambda: 1
-  clustering:
-    remove_first_component: TRUE
-    dims: 30
-    min.cutoff: 20 # Cutoff for feature to be included in the VariableFeatures for the object. 
-    min.dist: 0.3
-    algorithm: 3
-    resolution: 0.4
-  batch_correction: 
-    enable: TRUE
-    variable_to_regress: "sample"
-  cores: 4
+    reference:
 
 # -- Cluster resources configuration -- #
 resources:

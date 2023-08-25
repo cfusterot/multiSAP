@@ -7,13 +7,26 @@ output:
     code_folding: hide
 params:
   sample: snakemake@params['sample']
+
 ---
 
-## Snakemake parameters
+## Snakemake parameters -- ###
 directory = snakemake@params['directory']
-outs = snakemake@params['outs']
-sample_id = snakemake@params['sample']
+outs = snakemake@input['outs']
 reference = snakemake@params['reference']
+ncount_atac_max = snakemake@params['ncount_atac_max']
+ncount_rna_max = snakemake@params['ncount_rna_max']
+ncount_atac_min = snakemake@params['ncount_atac_min']
+ncount_rna_min = snakemake@params['ncount_rna_min']
+nuclesome_signal = snakemake@params['nuclesome_signal']
+tss_enrichment = snakemake@params['tss_enrichment']
+percent_mt = snakemake@params['percent_mt']
+min_depth = snakemake@params['min_depth']
+n_cells_conf_detected = snakemake@params['n_cells_conf_detected']
+strand_correlation = snakemake@params['strand_correlation']
+min_cell_var = snakemake@params['min_cell_var']
+
+sample_id = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, directory), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
 
 ### START
 ```{r setup, include=FALSE}
@@ -149,13 +162,13 @@ The following parameter were used to remove low quality cells : (1) peaks counts
 # filter out low quality cells
 pbmc <- subset(
   x = pbmc,
-  subset = nCount_ATAC < 25000 &
-    nCount_RNA < 20000 &
-    nCount_ATAC > 1000 &
-    nCount_RNA > 1000 &
-    nucleosome_signal < 2 &
-    TSS.enrichment > 3 &
-    percent.mt < 10
+  subset = nCount_ATAC < ncount_atac_max &
+    nCount_RNA < ncount_rna_max &
+    nCount_ATAC > ncount_atac_min &
+    nCount_RNA > ncount_rna_min &
+    nucleosome_signal < nuclesome_signal &
+    TSS.enrichment > tss_enrichment &
+    percent.mt < percent_mt
 )
 
 pbmc
@@ -242,16 +255,6 @@ pbmc <- LabelTransfer(pbmc)
 p <- FeatureScatter(pbmc,feature1 = "refUMAP_1", feature2 = "refUMAP_2", group.by = "predicted.celltype.l2", pt.size = 0.1) + 
         NoLegend() + ggtitle(NULL)
 LabelClusters(p, id = "colors")
-# p1 <- LabelClusters(p, id = "colors")
-# 
-# p2 <- pbmc@meta.data %>%
-#   group_by(orig.ident, predicted.celltype.l2) %>%
-#   summarize(count = n()) %>% 
-#   ggplot(aes(x = orig.ident, y = count)) +
-#   geom_bar(aes(fill = predicted.celltype.l2), position = 'fill', stat = 'identity', width=0.01) +
-#   scale_x_discrete(expand = c(0,0)) + scale_y_continuous(expand = c(0,0)) +
-#   xlab(NULL) + ylab(NULL) + theme_classic()
-# plot_grid(p1, p2, rel_widths = c(2, 1))
 ```
 
 ## Weighted Nearest Neighbor Analysis
@@ -284,14 +287,6 @@ Doublet were identified using two computational frameworks: AMULET (based on ATA
   names(multiplet.metadata) <- Cells(pbmc)
   multiplet.metadata[multiplets] <- "multiplet"
   pbmc$multiplet_amulet <- multiplet.metadata
-
-## Scrubelt
-  # singlets <- data.table::fread(paste0("../../data/", params$sample, "/scrublet.tsv")) %>%
-  #   data.frame() %>% dplyr::filter(!called) %>% pull(barcode)
-  # singlets.metadata <- rep("multiplet", length(Cells(pbmc)))
-  # names(singlets.metadata) <- Cells(pbmc)
-  # singlets.metadata[singlets] <- "singlet"
-  # pbmc$multiplet_scrubelt <- singlets.metadata
   
   DimPlot(pbmc, group.by = "multiplet_amulet", pt.size = 1, 
         cols = c("singlet" = "grey", "multiplet" = "purple"), 
@@ -304,12 +299,12 @@ Doublet were identified using two computational frameworks: AMULET (based on ATA
 
 ```{r, include=FALSE}
 # save RDS file
-saveRDS(pbmc, file.path(directory, "signac", paste0(Sys.Date(), "_", params$sample, "_Seurat.rds")))
+saveRDS(pbmc, file.path(directory, "signac", paste0(params$sample, "_Seurat.rds")))
 
 celltype <- data.frame(predicted.celltype.l2 = pbmc$predicted.celltype.l2,
            refUMAP_1 = pbmc$refUMAP_1,  refUMAP_2 = pbmc$refUMAP_2)
 
-write.csv(celltype, file.path(directory, "signac", paste0(Sys.Date(),"_", params$sample, "_pred.celltype.l2.csv" ))
+write.csv(celltype, file.path(directory, "signac", paste0(params$sample, "_pred.celltype.l2.csv" )))
 ```
 
 # Mitochondrial DNA variant calling
@@ -333,7 +328,7 @@ VlnPlot(pbmc, "mtDNA_copy", group.by = "predicted.celltype.l2", pt.size = 0) + N
 
 **mtDNA coverage**
 ```{r, message=FALSE, warning=FALSE, results='hide'}
-pbmc <- subset(pbmc, mtDNA_depth > 5)
+pbmc <- subset(pbmc, mtDNA_depth > min_depth)
 mito <- readRDS(file.path(directory, "mgatk", "final", paste0(sample_id, ".rds")))
 mito <- mito[,Cells(pbmc)]
 ```
@@ -358,7 +353,7 @@ cov_df %>% reshape2::melt(id.vars = "pos") %>% # dplyr::filter(value > 5) %>%
 
 
 ```{r, message=FALSE, warning=FALSE}
-source("../../global_func/variant_calling.R")
+source("../scripts/variant_calling.R")
 suppressWarnings(mmat <- call_mutations_mgatk(mito))
 VariantPlot(
   as.data.frame(rowData(mmat)),
@@ -368,8 +363,8 @@ VariantPlot(
 )
 
   var <- as.data.frame(rowData(mmat))
-  var <- var %>% subset(n_cells_conf_detected >= 1 &
-                          strand_correlation > 0.65 &
+  var <- var %>% subset(n_cells_conf_detected >= n_cells_conf_detected &
+                          strand_correlation > strand_correlation &
                           # vmr >= vmr.thres &
                           variant %ni% c("301A>C", "302A>C", "310T>C", "316G>C")) %>% pull(variant)
   mmat <- mmat[var,]
@@ -402,24 +397,6 @@ mtVAR.meta %>% filter(vmr < 0.01) %>% arrange(position) %>%
                 options = list(dom='frtBip', buttons = c('csv')))
 ```
 
-```{r, include=FALSE, echo=FALSE}
-homoVar <- mtVAR.meta %>% filter(vmr < 0.01) %>% arrange(position) %>% pull(variant)
-
-M.VAR <- c("m.489T>C", "15043G>A", "10400C>T", "14783T>C", "15301G>A")
-L.VAR <- c("10398A>G", "12705C>T", "16223C>T", "8701A>G", "9540T>C", "10873T>C")
-N.VAR <- c("15326A>G", "8860A>G", "750A>G", "4769A>G", "263A>G", "1438A>G", "7028C>T", "2706A>G", "11719G>A", "14766C>T", "73A>G", "16519C")
-
-Macro_haplogroup <- ifelse(sum(homoVar %in% M.VAR) > 2, "M",
-                    ifelse(sum(homoVar %in% L.VAR) > 2, "L", 
-                    ifelse(sum(homoVar %in% N.VAR) > 2,  "N", "Wrong")))
-
-# Lineage L ("Africa n"): L0, L1, L2, L3, L4, L5, L6
-# Lineage M ("Asian"): C, D, E, G, M, Q, Z
-# Lineage N ("Eurasian"): A, B, F, H, HV, I, J, K, N, O, P, R, S, T, U, V, W, X, Y
-
-
-```
-
 **List of high-confident heteroplasmic variant**
 ```{r}
 mtVAR.meta %>% filter(vmr >= 0.01, n_cells_conf_detected >= 5) %>% arrange(desc(mean)) %>%
@@ -434,4 +411,13 @@ sessioninfo::session_info() %>%
     summary = 'Current session info',
     open    = TRUE
   )
+```
+
+
+```{r}
+render_report = function(sample) {
+  rmarkdown::render('01_pre-process.Rmd', 
+  params = list(sample= sample),
+  output_file = file.path(paste0('01_preprocessing',sample,'.html')
+))}
 ```

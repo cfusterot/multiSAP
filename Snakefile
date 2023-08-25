@@ -57,7 +57,8 @@ rule all:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
-                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt"
+                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
+                "{OUTDIR}/{sample}/signac/report.html"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
 # -- Rule files -- #
@@ -65,5 +66,5 @@ include: "rules/cellranger.smk"
 include: "rules/qc.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"
-#include: "rules/signac.smk"
+include: "rules/signac.smk"
 include: "rules/other.smk"

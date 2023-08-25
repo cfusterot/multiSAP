@@ -7,25 +7,30 @@ if config["signac"]["enable"]:
             mgatk="{}/{{sample}}/mgatk/final".format(OUTDIR), 
             amulet="{}/{{sample}}/amulet/MultipletBarcodes_01.txt".format(OUTDIR)
         output:
-            directory=expand("{OUTDIR}/signac", OUTDIR = OUTDIR),
-            qc_plots=expand("{OUTDIR}/signac/plots/vlnplot_qc_beforefiltering_ATAC.pdf", OUTDIR = OUTDIR)
+            report="{}/{{sample}}/signac/report.html".format(OUTDIR)
         conda:
             "../envs/signac.yaml"
         params: 
-            min_peak_width=config['signac']['qc']['min_peak_width'],
-            max_peak_width=config['signac']['qc']['max_peak_width'],
-            min_counts=config['signac']['qc']['min_counts'],
-            integration=config['signac']['integrate_samples'],
-            nb_cores=config['signac']['cores'],
-            granges_ens=config['signac']['annotation']['granges_ens'],
-            genome=config['signac']['annotation']['genome']
+            directory = expand("{OUTDIR}", OUTDIR = OUTDIR),
+            reference = config['signac']['annotation']['reference'],
+            ncount_rna_max = config['signac']['qc']['ncount_rna_max'],            
+            ncount_atac_max = config['signac']['qc']['ncount_atac_max'],
+            ncount_atac_min = config['signac']['qc']['ncount_atac_min'],
+            ncount_rna_min=config['signac']['qc']['ncount_rna_min'],
+            nuclesome_signal = config['signac']['qc']['nuclesome_signal'],
+            tss_enrichment = config['signac']['qc']['tss_enrichment'],
+            percent_mt = config['signac']['qc']['percent_mt'],
+            min_depth = config['signac']['mito']['min_depth'],
+            n_cells_conf_detected = config['signac']['mito']['n_cells_conf_detected'],
+            strand_correlation = config['signac']['mito']['strand_correlation'],
+            min_cell_var = config['signac']['mito']['min_cell_var']
         threads: get_resource("signac", "threads")
         resources:
             mem_mb=get_resource("signac", "mem_mb"),
             walltime=get_resource("signac", "walltime")
         log:
-            err=expand("{LOGDIR}/signac/step1_signac.err", LOGDIR = LOGDIR),
-            out=expand("{LOGDIR}/signac/step1_signac.out", LOGDIR = LOGDIR)
+            err=expand("{LOGDIR}/signac/{{sample}}_preprocess.err", LOGDIR = LOGDIR),
+            out=expand("{LOGDIR}/signac/{{sample}}_preprocess.out", LOGDIR = LOGDIR)
         # Add here something 
         script:
             "../scripts/01_pre-process.Rmd"
