@@ -7,11 +7,11 @@ if config["signac"]["enable"]:
             mgatk="{}/{{sample}}/mgatk/final".format(OUTDIR), 
             amulet="{}/{{sample}}/amulet/MultipletBarcodes_01.txt".format(OUTDIR)
         output:
-            report="{}/{{sample}}/signac/report.html".format(OUTDIR)
+            report="{}/{{sample}}/signac/01_preprocessing_{{sample}}.html".format(OUTDIR)
         conda:
             "../envs/signac.yaml"
         params: 
-            directory = expand("{OUTDIR}", OUTDIR = OUTDIR),
+            directory = expand("{OUTDIR}/", OUTDIR = OUTDIR),
             reference = config['signac']['annotation']['reference'],
             ncount_rna_max = config['signac']['qc']['ncount_rna_max'],            
             ncount_atac_max = config['signac']['qc']['ncount_atac_max'],
@@ -33,4 +33,4 @@ if config["signac"]["enable"]:
             out=expand("{LOGDIR}/signac/{{sample}}_preprocess.out", LOGDIR = LOGDIR)
         # Add here something 
         script:
-            "../scripts/01_pre-process.Rmd"
+            "../scripts/01_preprocess_render.R"

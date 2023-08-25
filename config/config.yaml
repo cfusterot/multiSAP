@@ -50,7 +50,7 @@ signac:
     strand_correlation: 0.65
     min_cell_var: 5
   annotation:
-    reference:
+    reference: "/data/gpfs-1/groups/ag_ludwig/work/bridge_annotation/pbmc_multimodal.h5seurat"
 
 # -- Cluster resources configuration -- #
 resources:

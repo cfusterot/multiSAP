@@ -1,67 +1,50 @@
+
 ---
 title: "01_Pre-process.rmd"
 author: "Yu-Hsin Josch Hsieh"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
+output:
   html_document:
     code_folding: hide
 params:
-  sample: snakemake@params['sample']
-
+  sample: sample_id
 ---
 
-## Snakemake parameters -- ###
-directory = snakemake@params['directory']
-outs = snakemake@input['outs']
-reference = snakemake@params['reference']
-ncount_atac_max = snakemake@params['ncount_atac_max']
-ncount_rna_max = snakemake@params['ncount_rna_max']
-ncount_atac_min = snakemake@params['ncount_atac_min']
-ncount_rna_min = snakemake@params['ncount_rna_min']
-nuclesome_signal = snakemake@params['nuclesome_signal']
-tss_enrichment = snakemake@params['tss_enrichment']
-percent_mt = snakemake@params['percent_mt']
-min_depth = snakemake@params['min_depth']
-n_cells_conf_detected = snakemake@params['n_cells_conf_detected']
-strand_correlation = snakemake@params['strand_correlation']
-min_cell_var = snakemake@params['min_cell_var']
-
-sample_id = unlist(sapply(strsplit(unlist(sapply(strsplit(outs, directory), `[`, 2, simplify=FALSE)), "/cellranger_count/outs"), `[`, 1, simplify=FALSE))
-
 ### START
-```{r setup, include=FALSE}
+```{r setup, include=TRUE}
+# Set up knitr parameters
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Load packages and genome annotation
 
 ```{r packages, message=FALSE, warning=FALSE}
-library(Seurat)
-library(Signac)
-library(EnsDb.Hsapiens.v86)
-library(BSgenome.Hsapiens.UCSC.hg38)
-library(SummarizedExperiment)
-library(ggplot2)
-library(Matrix)
-library(dplyr)
-library(cowplot)
+suppressMessages(library(Seurat))
+suppressMessages(library(Signac))
+suppressMessages(library(EnsDb.Hsapiens.v86))
+suppressMessages(library(BSgenome.Hsapiens.UCSC.hg38))
+suppressMessages(library(SummarizedExperiment))
+suppressMessages(library(ggplot2))
+suppressMessages(library(Matrix))
+suppressMessages(library(dplyr))
+suppressMessages(library(cowplot))
 # other called packages SeuratDisk, details and DT
 set.seed(123)
 '%ni%' <- Negate('%in%')
 suppressWarnings(annotations <- GetGRangesFromEnsDb(ensdb = EnsDb.Hsapiens.v86))
-seqlevelsStyle(annotations) <- 'UCSC'
-genome(annotations) <- "hg38"
+annotations = renameSeqlevels(annotations, mapSeqlevels(seqlevels(annotations), "UCSC"))
+genome(annotations) = "hg38"
 ```
 
 ## Setup the Seurat Object: `r params$sample`
 
 ```{r create seurat object, message=FALSE, warning=FALSE}
 # the 10x hdf5 file contains both data types. 
-  counts <- Read10X_h5(file.path(outs,"filtered_feature_bc_matrix.h5"))
-  fragpath <- file.path(outs, atac_fragments.tsv.gz)
+  counts <- Read10X_h5(file.path(params$outs,"filtered_feature_bc_matrix.h5"))
+  fragpath <- file.path(params$outs, 'atac_fragments.tsv.gz')
   
   # load meta.data
-  metadata <- read.csv(file.path(outs, "per_barcode_metrics.csv"),
+  metadata <- read.csv(file.path(params$outs, "per_barcode_metrics.csv"),
                        header = TRUE,
                        row.names = 1) 
   
@@ -74,7 +57,7 @@ genome(annotations) <- "hg38"
   counts = counts$Peaks,
   sep = c(":", "-"),
   fragments = fragpath,
-  annotation = annotations)
+  annotation =  annotations)
 
   pbmc
 ```
@@ -162,13 +145,13 @@ The following parameter were used to remove low quality cells : (1) peaks counts
 # filter out low quality cells
 pbmc <- subset(
   x = pbmc,
-  subset = nCount_ATAC < ncount_atac_max &
-    nCount_RNA < ncount_rna_max &
-    nCount_ATAC > ncount_atac_min &
-    nCount_RNA > ncount_rna_min &
-    nucleosome_signal < nuclesome_signal &
-    TSS.enrichment > tss_enrichment &
-    percent.mt < percent_mt
+  subset = nCount_ATAC < params$ncount_atac_max &
+    nCount_RNA < params$ncount_rna_max &
+    nCount_ATAC > params$ncount_atac_min &
+    nCount_RNA > params$ncount_rna_min &
+    nucleosome_signal < params$nuclesome_signal &
+    TSS.enrichment > params$tss_enrichment &
+    percent.mt < params$percent_mt
 )
 
 pbmc
@@ -209,7 +192,7 @@ library(SeuratDisk)
 
 LabelTransfer <- function(SO){
  
- pbmc.cite <- LoadH5Seurat(reference)
+ pbmc.cite <- LoadH5Seurat(params$reference)
 
  DefaultAssay(SO) <- "SCT"
 
@@ -243,7 +226,6 @@ anchors <- FindTransferAnchors(
 
   SO$predicted.celltype.l1 <- mapped_SO$predicted.celltype.l1
   SO$predicted.celltype.l2 <- mapped_SO$predicted.celltype.l2
-  # SO$predicted.celltype.l3 <- mapped_SO$predicted.celltype.l3
   SO <- AddMetaData(SO, mapped_SO@reductions$ref.umap@cell.embeddings, col.name = c("refUMAP_1", "refUMAP_2"))
   return(SO)
 }
@@ -329,7 +311,7 @@ VlnPlot(pbmc, "mtDNA_copy", group.by = "predicted.celltype.l2", pt.size = 0) + N
 **mtDNA coverage**
 ```{r, message=FALSE, warning=FALSE, results='hide'}
 pbmc <- subset(pbmc, mtDNA_depth > min_depth)
-mito <- readRDS(file.path(directory, "mgatk", "final", paste0(sample_id, ".rds")))
+mito <- readRDS(file.path(directory, "mgatk", "final", paste0(params$sample, ".rds")))
 mito <- mito[,Cells(pbmc)]
 ```
 
@@ -363,8 +345,8 @@ VariantPlot(
 )
 
   var <- as.data.frame(rowData(mmat))
-  var <- var %>% subset(n_cells_conf_detected >= n_cells_conf_detected &
-                          strand_correlation > strand_correlation &
+  var <- var %>% subset(n_cells_conf_detected >= params$n_cells_conf_detected &
+                          strand_correlation > params$strand_correlation &
                           # vmr >= vmr.thres &
                           variant %ni% c("301A>C", "302A>C", "310T>C", "316G>C")) %>% pull(variant)
   mmat <- mmat[var,]
@@ -399,7 +381,7 @@ mtVAR.meta %>% filter(vmr < 0.01) %>% arrange(position) %>%
 
 **List of high-confident heteroplasmic variant**
 ```{r}
-mtVAR.meta %>% filter(vmr >= 0.01, n_cells_conf_detected >= 5) %>% arrange(desc(mean)) %>%
+mtVAR.meta %>% filter(vmr >= 0.01, n_cells_conf_detected >= params$n_cells_conf_detected) %>% arrange(desc(mean)) %>%
   DT::datatable(rownames=FALSE, 
                 extensions = 'Buttons', 
                 options = list(dom='frtBip', buttons = c('csv')))
@@ -411,13 +393,4 @@ sessioninfo::session_info() %>%
     summary = 'Current session info',
     open    = TRUE
   )
-```
-
-
-```{r}
-render_report = function(sample) {
-  rmarkdown::render('01_pre-process.Rmd', 
-  params = list(sample= sample),
-  output_file = file.path(paste0('01_preprocessing',sample,'.html')
-))}
 ```

@@ -22,3 +22,4 @@ dependencies:
   - r-dt
   - r-details
   - r-seuratdisk
+  - r-rmarkdown
