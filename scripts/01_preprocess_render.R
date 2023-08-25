@@ -18,12 +18,6 @@ strand_correlation = snakemake@params$strand_correlation
 min_cell_var = snakemake@params$min_cell_var
 
 message(paste0("Analysing sample ", sample_id))
-message("Param list: ")
-print(outs)
-print(directory)
-print(reference)
-print(ncount_atac_max)
-print(ncount_atac_min)
 
 message("Rendering analysis report: 01 sample pre-processing")
 render_report = function(sample) {
@@ -43,6 +37,7 @@ render_report = function(sample) {
                 n_cells_conf_detected = n_cells_conf_detected, 
                 strand_correlation = strand_correlation, 
                 min_cell_var = min_cell_var),
-  output_file = file.path(paste0('01_preprocessing_', sample_id,'.html')
-))}
+  output_file = file.path(directory, "signac", paste0('01_preprocessing_', sample_id,'.html'))
+)}
+
 
