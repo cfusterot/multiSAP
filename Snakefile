@@ -58,6 +58,7 @@ rule all:
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
                 "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
                 "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
+                "{OUTDIR}/{sample}/cellbender/cellbender_output_file.h5",
                 "{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 
@@ -67,4 +68,4 @@ include: "rules/qc.smk"
 include: "rules/mgatk.smk"
 include: "rules/amulet.smk"
 include: "rules/signac.smk"
-include: "rules/other.smk"
+include: "rules/cellbender.smk"
