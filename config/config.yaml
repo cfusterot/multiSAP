@@ -77,5 +77,5 @@ resources:
         walltime: 1140
     signac:
         threads: 2
-        mem_mb: 164000
+        mem_mb: 120000
         walltime: 7200

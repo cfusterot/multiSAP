@@ -1,4 +1,3 @@
-
 ---
 title: "01_Pre-process.rmd"
 author: "Yu-Hsin Josch Hsieh"
@@ -8,6 +7,20 @@ output:
     code_folding: hide
 params:
   sample: sample_id
+  outs: ""
+  directory: ""
+  reference: ""
+  ncount_atac_max: ""
+  ncount_rna_max: ""
+  ncount_atac_min: ""
+  ncount_rna_min: ""
+  nuclesome_signal: ""
+  tss_enrichment: ""
+  percent_mt: ""
+  min_depth: ""
+  n_cells_conf_detected: ""
+  strand_correlation: ""
+  min_cell_var: ""
 ---
 
 ### START
@@ -28,6 +41,7 @@ suppressMessages(library(ggplot2))
 suppressMessages(library(Matrix))
 suppressMessages(library(dplyr))
 suppressMessages(library(cowplot))
+suppressMessages(library(sessioninfo))
 # other called packages SeuratDisk, details and DT
 set.seed(123)
 '%ni%' <- Negate('%in%')
@@ -40,7 +54,7 @@ genome(annotations) = "hg38"
 
 ```{r create seurat object, message=FALSE, warning=FALSE}
 # the 10x hdf5 file contains both data types. 
-  counts <- Read10X_h5(file.path(params$outs,"filtered_feature_bc_matrix.h5"))
+  counts <- Read10X_h5(file.path(params$outs, "filtered_feature_bc_matrix.h5"))
   fragpath <- file.path(params$outs, 'atac_fragments.tsv.gz')
   
   # load meta.data
@@ -57,7 +71,7 @@ genome(annotations) = "hg38"
   counts = counts$Peaks,
   sep = c(":", "-"),
   fragments = fragpath,
-  annotation =  annotations)
+  annotation = annotations)
 
   pbmc
 ```
@@ -120,7 +134,7 @@ The following QC metrics are determined and visualized: (1) Nucleosome banding p
 DefaultAssay(pbmc) <- "ATAC"
 pbmc <- NucleosomeSignal(pbmc)
 pbmc <- TSSEnrichment(pbmc)
-mtDepth <- read.table(file.path(directory, "mgatk",paste0(sample_id, ".depthTable.txt")),
+mtDepth <- read.table(file.path(params$directory, params$sample,"mgatk/final",paste0(params$sample, ".depthTable.txt")),
                        header = FALSE,
                        row.names = 1) 
 pbmc$mtDNA_depth <- mtDepth[Cells(pbmc),]
@@ -191,11 +205,8 @@ library(SeuratDisk)
 # load PBMC reference
 
 LabelTransfer <- function(SO){
- 
  pbmc.cite <- LoadH5Seurat(params$reference)
-
  DefaultAssay(SO) <- "SCT"
-
 # transfer cell type labels from reference to query
 anchors <- FindTransferAnchors(
     reference = pbmc.cite,
@@ -264,7 +275,7 @@ DimPlot(pbmc, reduction = "wnn.umap", group.by = "predicted.celltype.l2", label 
 Doublet were identified using two computational frameworks: AMULET (based on ATAC) and Scrubelt (based on GEX)
 ```{r, fig.width=5, fig.height=5}
 ## amulet
-  multiplets <- read.table(file.path(directory, "amulet", "MultipletBarcodes_01.txt")) %>% t() %>% as.vector() #/MultipletCellIds_01.txt
+  multiplets <- read.table(file.path(params$directory, params$sample,"amulet", "MultipletBarcodes_01.txt")) %>% t() %>% as.vector() #/MultipletCellIds_01.txt
   multiplet.metadata <- rep("singlet", length(Cells(pbmc)))
   names(multiplet.metadata) <- Cells(pbmc)
   multiplet.metadata[multiplets] <- "multiplet"
@@ -281,12 +292,12 @@ Doublet were identified using two computational frameworks: AMULET (based on ATA
 
 ```{r, include=FALSE}
 # save RDS file
-saveRDS(pbmc, file.path(directory, "signac", paste0(params$sample, "_Seurat.rds")))
+saveRDS(pbmc, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_Seurat.rds")))
 
 celltype <- data.frame(predicted.celltype.l2 = pbmc$predicted.celltype.l2,
            refUMAP_1 = pbmc$refUMAP_1,  refUMAP_2 = pbmc$refUMAP_2)
 
-write.csv(celltype, file.path(directory, "signac", paste0(params$sample, "_pred.celltype.l2.csv" )))
+write.csv(celltype, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_pred.celltype.l2.csv" )))
 ```
 
 # Mitochondrial DNA variant calling
@@ -311,7 +322,7 @@ VlnPlot(pbmc, "mtDNA_copy", group.by = "predicted.celltype.l2", pt.size = 0) + N
 **mtDNA coverage**
 ```{r, message=FALSE, warning=FALSE, results='hide'}
 pbmc <- subset(pbmc, mtDNA_depth > min_depth)
-mito <- readRDS(file.path(directory, "mgatk", "final", paste0(params$sample, ".rds")))
+mito <- readRDS(file.path(params$directory, params$sample, "mgatk", "final", paste0(params$sample, ".rds")))
 mito <- mito[,Cells(pbmc)]
 ```
 
@@ -355,7 +366,7 @@ VariantPlot(
 
 ```{r, include=FALSE}
 # save RDS file
-saveRDS(mmat, file.path(directory, "signac", paste0(Sys.Date(),"_", params$sample, "_mmat.rds" )))
+saveRDS(mmat, file.path(params$directory, params$sample, "signac", paste0(params$sample, "_mmat.rds" )))
 ```
 
 **Mitochondrial variant pseduobulk heteroplasmy rank plot**
