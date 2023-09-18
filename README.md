@@ -1,2 +1,4 @@
-# multiSAP
+multiSAP
+
 Multiome Sequencing Analysis Pipeline
+

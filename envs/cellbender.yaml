@@ -1,11 +1,13 @@
 name: cellbender
 channels:
-    - pytorch
     - nvidia
     - anaconda
 dependencies:
     - python=3.7 
     - cuda-toolkit
     - cuda-nvcc
+    - pip
     - pip:
+      - torch
       - cellbender
+      - cuda-python

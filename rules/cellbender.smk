@@ -9,17 +9,15 @@ rule cellbender:
         "../envs/cellbender.yaml"
     threads: get_resource("cellbender", "threads")
     resources:
-        time="12:00:00",
-        mem=60000,
-        nodes=1,
+        time="4:00:00",
+        partition='gpu',
         nvidia_gpu=1,
-        partition="gpu",
-        slurm="gres=gpu:tesla:1",
-        walltime=get_resource("cellbender", "walltime")
+        gpu='gpu:tesla:1',
+        mpi='srun'
     log:
         err="{}/{{sample}}/cellbender.err".format(LOGDIR),
         out="{}/{{sample}}/cellbender.out".format(LOGDIR)
     shell:
         """
-        cellbender remove-background --cuda --input {input.h5} --output {output.cb} --expected-cells 15000 --total-droplets-included 50000 --fpr 0.01 --epochs 150
+        cellbender remove-background --input {input.h5} --output {output.cb} --fpr 0.01 --cuda --epochs 150 --expected-cells 50000 --exclude-feature-types Peaks
         """
