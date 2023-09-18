@@ -56,11 +56,10 @@ signac:
 resources:
     default:
         threads: 1
-        mem_mb: 8000
         walltime: 480
     fastqc:
-      threads: 4
-      mem_mb: 32000
+        threads: 4
+        mem_mb: 32000
     fastq_screen:
       threads: 8
     cellranger:
@@ -81,5 +80,4 @@ resources:
         walltime: 7200
     cellbender:
         threads: 2
-        mem: 120000
         walltime: 7240

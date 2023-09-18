@@ -12,8 +12,7 @@ rule cellbender:
         time="4:00:00",
         partition='gpu',
         nvidia_gpu=1,
-        gpu='gpu:tesla:1',
-        mpi='srun'
+        gpu='gpu:tesla:1'
     log:
         err="{}/{{sample}}/cellbender.err".format(LOGDIR),
         out="{}/{{sample}}/cellbender.out".format(LOGDIR)
