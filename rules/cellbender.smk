@@ -10,7 +10,7 @@ if config["cellbender"]["enable"]:
         threads: get_resource("cellbender", "threads")
         params:
             fpr = config['cellbender']['params']['fpr'],
-            epoch = config['cellbender']['params']['epochs'],
+            epochs = config['cellbender']['params']['epochs'],
             expected_cells = config['cellbender']['params']['expected_cells'],
             extra = config['cellbender']['params']['extra']             
         resources:

@@ -58,7 +58,7 @@ cellbender:
   params:
     fpr: 0.01
     epochs: 150 
-    expected-cells: 50000 
+    expected_cells: 50000 
     extra: "--exclude-feature-types Peaks"
 
 # -- Cluster resources configuration -- #
