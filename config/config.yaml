@@ -57,6 +57,7 @@ resources:
     default:
         threads: 1
         walltime: 480
+        mem_mb: 8000
     fastqc:
         threads: 4
         mem_mb: 32000

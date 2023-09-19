@@ -19,4 +19,5 @@ rule cellbender:
     shell:
         """
         cellbender remove-background --input {input.h5} --output {output.cb} --fpr 0.01 --cuda --epochs 150 --expected-cells 50000 --exclude-feature-types Peaks
+        mv ckpt.tar.gz {OUTDIR}/{wildcards.sample}/cellbender
         """
