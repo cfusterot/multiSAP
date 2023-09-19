@@ -1,0 +1,17 @@
+## This is a yaml file, defining options for specific rules or by default.
+## The '#' defines a comment.
+## the two spaces at the beginning of rows below rulenames are important.
+## For more information see https://snakemake.readthedocs.io/en/stable/executing/cluster-cloud.html#cluster-execution
+
+# Overwrite/Define arguments for all rules
+__default__:
+      queue: medium
+      time: 1140 # default time (minutes)
+      ntasks: 1
+      mem_mb: 64GB # default memory
+
+# You can  overwrite values for specific rules
+cellbender:
+  queue: gpu
+  gres: gpu:tesla:1
+  mem_mb: 120GB

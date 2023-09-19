@@ -1,0 +1,18 @@
+restart-times: 0
+cluster-config: "/data/gpfs-1/home/users/cofu10_c/.config/snakemake/hpc-cluster/cluster_config.yaml" #abs path
+cluster: "scheduler.py" #
+cluster-status: "slurm_status.py" #
+max-jobs-per-second: 10
+max-status-checks-per-second: 10
+cores: 99 # how many jobs you want to submit to your cluster queue
+local-cores: 1
+rerun-incomplete: true  # recomended for cluster submissions
+keep-going: false
+jobs: 100
+latency-wait: 60
+local-cores: 8
+max-jobs-per-second: 20
+printshellcmds: False
+scheduler: greedy
+use-conda: True
+conda-frontend: mamba
