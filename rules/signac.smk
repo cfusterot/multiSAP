@@ -13,6 +13,7 @@ if config["signac"]["enable"]:
         params: 
             directory = expand("{OUTDIR}/", OUTDIR = OUTDIR),
             reference = config['signac']['annotation']['reference'],
+            haplogroup = config['signac']['annotation']['haplogroup'],
             ncount_rna_max = config['signac']['qc']['ncount_rna_max'],            
             ncount_atac_max = config['signac']['qc']['ncount_atac_max'],
             ncount_atac_min = config['signac']['qc']['ncount_atac_min'],

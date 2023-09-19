@@ -51,6 +51,15 @@ signac:
     min_cell_var: 5
   annotation:
     reference: "/data/gpfs-1/groups/ag_ludwig/work/bridge_annotation/pbmc_multimodal.h5seurat"
+    haplogroup: "/data/gpfs-1/users/cofu10_c/work/references/haplotype/2023-07-15_haplogroup_simple.tsv"
+
+cellbender:
+  enable: TRUE
+  params:
+    fpr: 0.01
+    epochs: 150 
+    expected-cells: 50000 
+    extra: "--exclude-feature-types Peaks"
 
 # -- Cluster resources configuration -- #
 resources:
