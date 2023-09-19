@@ -6,12 +6,12 @@
 # -- 1. Samples configuration -- #
 samples: "config/samples.tsv"
 units: "config/units.tsv"
-out: "/data/gpfs-1/users/cofu10_c/scratch/P1813_2nd/out"
-log: "/data/gpfs-1/users/cofu10_c/scratch/P1813_2nd/log" 
+out: "/data/gpfs-1/users/cofu10_c/scratch/josch/out"
+log: "/data/gpfs-1/users/cofu10_c/scratch/josch/log" 
 
 # -- 2. Program configuration -- # Configure the correspondent environmental modules and program paths for version control
 envmodules:
-    cellranger: "/fast/groups/ag_ludwig/Modules/modulefiles/cellranger-atac/2.1.0"
+    cellranger: "/fast/groups/ag_ludwig/Modules/modulefiles/cellranger-arc/2.0.2"
 
 # -- 3. Analysis parameters -- #
 # --- a. QC --- #
@@ -32,72 +32,53 @@ amulet:
 # --- d. (optional) Mitochondrial variant identification --- #
 mgatk:
    enable: TRUE 
-# --- e. (optional) Signac --- #
+
+# --- e. Sample INTEGRATION and pre-processing --- #
 signac:
   enable: TRUE
   qc:
-    min_peak_width: 20
-    max_peak_width: 10000
-    min_counts: 500
-    max_nucleosome_signal: 2
-    min_TSS: 2
-    min_peak_fragment: 1000
-    max_peak_fragment: 25000
-    min_percentage_peaks: 30
+    ncount_atac_min: 1000
+    ncount_rna_min: 1000
+    ncount_atac_max: 25000 
+    ncount_rna_max: 20000
+    nuclesome_signal: 2
+    tss_enrichment: 3
+    percent_mt: 10
   mito:
-    enable: TRUE
     min_depth: 10
-    min_strand_cor: 0.65
+    n_cells_conf_detected: 1
+    strand_correlation: 0.65
     min_cell_var: 5
-    min_VMR: 0.01
   annotation:
-    granges_ens: EnsDb.Hsapiens.v86 
-    genome: "hg38"
-  integrate_samples: TRUE
-  cores: 4
-
-# --- f. (optional) Genotyping with gotcha --- #
-gotcha:
-  enable: TRUE
-  whitelist: "/data/gpfs-1/users/cofu10_c/work/references/barcodes/737K-cratac-v1.txt"
-  primer:
-    primer_sequence: "AAAGCCTGTAGTTTTACTTACTCTCGTCTCCACAG"
-    reverse_complement: TRUE
-    max_mismatch: 3
-  mutation:
-    read: "R2"
-    start: 35
-    end: 38
-    mut_sequence: "AAA"
-    wt_sequence: "ACA"
+    reference: "/data/gpfs-1/groups/ag_ludwig/work/bridge_annotation/pbmc_multimodal.h5seurat"
 
 # -- Cluster resources configuration -- #
 resources:
     default:
         threads: 1
-        mem_mb: 8000
         walltime: 480
+        mem_mb: 8000
     fastqc:
-      threads: 4
-      mem_mb: 32000
+        threads: 4
+        mem_mb: 32000
     fastq_screen:
       threads: 8
     cellranger:
-        threads: 4
-        mem_mb: 120000
-        walltime: 4320
-    mgatk:
-        threads: 4
+        threads: 8
         mem_mb: 64000
-        walltime: 1140
+        walltime: 7200
+    mgatk:
+        threads: 8
+        mem_mb: 64000
+        walltime: 7200
     amulet:
         threads: 4
         mem_mb: 64000
         walltime: 1140
     signac:
         threads: 2
-        mem_mb: 64000
-        walltime: 1140
-    gotcha:
-        threads: 4
-        mem_mb: 80000
+        mem_mb: 120000
+        walltime: 7200
+    cellbender:
+        threads: 2
+        walltime: 7240
