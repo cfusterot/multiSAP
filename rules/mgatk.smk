@@ -2,9 +2,11 @@ import glob
 
 rule zcat:
     input:
-        gz="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix/barcodes.tsv.gz".format(OUTDIR)
+        finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
     output:
         tsv="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix/barcodes.tsv".format(OUTDIR)
+    params: 
+         gz="{}/{{sample}}/cellranger_count/outs/filtered_feature_bc_matrix/barcodes.tsv.gz".format(OUTDIR)
     threads: get_resource("default", "threads")
     resources:
         mem_mb=get_resource("default", "mem_mb"),
@@ -14,7 +16,7 @@ rule zcat:
         out="{}/{{sample}}/zcat.out".format(LOGDIR)
     shell: 
         """
-        zcat -k {input.gz} > {output.tsv}
+        zcat -k {params.gz} > {output.tsv}
         """
 
 rule mgatk:

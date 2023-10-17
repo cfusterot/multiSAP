@@ -56,9 +56,9 @@ rule all:
     input:
         expand(["{OUTDIR}/{sample}/cellranger_count/cellranger.finish",
                 "{OUTDIR}/{sample}/qc/multiqc_report.html",
-                "{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
-                "{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
-                "{OUTDIR}/{sample}/cellbender/cellbender_output_file.h5",
+                #"{OUTDIR}/{sample}/mgatk/final/{sample}.variant_stats.tsv.gz",
+                #"{OUTDIR}/{sample}/amulet/MultipletSummary.txt",
+                #"{OUTDIR}/{sample}/cellbender/cellbender_output_file.h5",
                 "{OUTDIR}/{sample}/signac/01_preprocessing_{sample}.html"
                 ], sample=samples['sample'], OUTDIR=OUTDIR)
 

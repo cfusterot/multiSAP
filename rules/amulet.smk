@@ -2,9 +2,11 @@ import glob
 
 rule atac_bc:
     input:
-        per_barcode_metrics="{}/{{sample}}/cellranger_count/outs/per_barcode_metrics.csv".format(OUTDIR)
+        finish="{}/{{sample}}/cellranger_count/cellranger.finish".format(OUTDIR)
     output:
         atac_bc="{}/{{sample}}/cellranger_count/outs/atac_bc.csv".format(OUTDIR)
+    params:
+        per_barcode_metrics="{}/{{sample}}/cellranger_count/outs/per_barcode_metrics.csv".format(OUTDIR)
     threads: get_resource("default", "threads")
     log:
         err="{}/{{sample}}/atac_bc.err".format(LOGDIR),
@@ -14,7 +16,7 @@ rule atac_bc:
         walltime=get_resource("default", "walltime")
     shell:
         """ 
-        awk -F"\\"*,\\"*" '{{print $1sep$4 ;sep=","}}' {input.per_barcode_metrics} | sed -e "1s/barcodeis_cell/barcode,is__cell_barcode/" > {output.atac_bc}  
+        awk -F"\\"*,\\"*" '{{print $1sep$4 ;sep=","}}' {params.per_barcode_metrics} | sed -e "1s/barcodeis_cell/barcode,is__cell_barcode/" > {output.atac_bc}  
         """
 
 
@@ -22,7 +24,7 @@ rule amulet:
     input:
         atac_bc="{}/{{sample}}/cellranger_count/outs/atac_bc.csv".format(OUTDIR)
     output:
-        multiplets="{}/{{sample}}/amulet/MultipletSummary.txt".format(OUTDIR)
+        multiplets="{}/{{sample}}/amulet/MultipletBarcodes_01.txt".format(OUTDIR)
     conda:
         "../envs/amulet.yaml"
     params:
