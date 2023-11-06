@@ -393,8 +393,8 @@ mtVAR.meta %>% filter(vmr < 0.01) %>% arrange(position) %>%
 
 ```{r, message=FALSE, warning=FALSE}
 homoVar <- mtVAR.meta %>% filter(vmr < 0.01 & mean > 0.9) %>% arrange(position) %>% pull(variant)
-if(file.exists(haplogroup)){
-  haplo_data <- data.table::fread(haplogroup)
+if(file.exists(params$haplogroup)){
+  haplo_data <- data.table::fread(params$haplogroup)
   M.VAR <- c("489T>C", "15043G>A", "10400C>T", "14783T>C", "15301G>A")
   L.VAR <- c("10398A>G", "12705C>T", "16223C>T", "8701A>G", "9540T>C","10873T>C")
   N.VAR <- c("15326A>G", "8860A>G", "750A>G", "4769A>G", "263A>G", "1438A>G", "7028C>T", "2706A>G", "11719G>A", "14766C>T", "73A>G", "16519C")

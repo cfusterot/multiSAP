@@ -29,6 +29,8 @@ strand_correlation = snakemake@params$strand_correlation
 print(strand_correlation)
 min_cell_var = snakemake@params$min_cell_var
 print(min_cell_var)
+haplogroup = snakemake@params$haplogroup
+print(haplogroup)
 message(paste0("Analysing sample ", sample_id))
 message(paste0("File path: ", file.path(directory, sample_id,"signac", paste0('01_preprocessing_', sample_id,'.html'))))
 
@@ -49,7 +51,8 @@ message("Rendering analysis report: 01 sample pre-processing")
                 min_depth = min_depth, 
                 n_cells_conf_detected = n_cells_conf_detected, 
                 strand_correlation = strand_correlation, 
-                min_cell_var = min_cell_var),
+                min_cell_var = min_cell_var,
+                haplogroup = haplogroup),
   output_file = file.path(directory, sample_id,"signac", paste0('01_preprocessing_', sample_id,'.html')))
 #}
 
