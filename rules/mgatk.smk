@@ -37,10 +37,10 @@ rule mgatk:
         out="{}/{{sample}}/mgatk.out".format(LOGDIR)
     shell:
         """
+        cd {OUTDIR}/{wildcards.sample}
         # common error resolved by those two export commands
         export LC_ALL=C.UTF-8
         export LANG=C.UTF-8
         # run mgatk command
-        mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk/ \
-        -bt CB -b {input.tsv} 
+        mgatk tenx -i {params.bam} -n {wildcards.sample} -o {OUTDIR}/{wildcards.sample}/mgatk -bt CB -b {input.tsv} 
         """
