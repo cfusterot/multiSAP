@@ -13,6 +13,7 @@ if config["cellbender"]["enable"]:
             fpr = config['cellbender']['params']['fpr'],
             epochs = config['cellbender']['params']['epochs'],
             expected_cells = config['cellbender']['params']['expected_cells'],
+            learning_rate = config['cellbender']['params']['learning_rate'],
             extra = config['cellbender']['params']['extra']             
         resources:
             time="4:00:00",
@@ -24,6 +25,7 @@ if config["cellbender"]["enable"]:
             out="{}/{{sample}}/cellbender.out".format(LOGDIR)
         shell:
             """
-            cellbender remove-background --input {params.h5} --output {output.cb} --fpr {params.fpr} --cuda --epochs {params.epochs} --expected-cells {params.expected_cells} {params.extra}
+            cd {OUTDIR}/{wildcards.sample}
+            cellbender remove-background --input {params.h5} --output {output.cb} --fpr {params.fpr} --cuda --epochs {params.epochs} --expected-cells {params.expected_cells} --learning-rate {params.learning_rate} {params.extra}
             mv ckpt.tar.gz {OUTDIR}/{wildcards.sample}/cellbender
             """
